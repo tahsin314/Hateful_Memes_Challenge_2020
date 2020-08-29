@@ -12,7 +12,7 @@ from albumentations import (
 
 SEED = 69
 device = 'cuda:0'
-data_dir = '../../data/Hateful_Meme/data/'
+data_dir = 'data/'
 model_name = 'resnet34'
 img_dim = 512
 batch_size = 16
