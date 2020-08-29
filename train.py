@@ -1,4 +1,6 @@
 from config import *
+import gc
+import time
 import numpy as np
 import pandas as pd
 import torch
@@ -16,6 +18,10 @@ np.random.seed(SEED)
 train_df = pd.read_json(f'{data_dir}/train.jsonl', lines=True)
 val_df = pd.read_json(f'{data_dir}/dev.jsonl', lines=True)
 
+train_df['img'] = train_df['img'].map(lambda x: f"{data_dir}{x}")
+val_df['img'] = val_df['img'].map(lambda x: f"{data_dir}/{x}")
+print(train_df.head(5))
+
 train_ds = HMDataset(train_df.img.values, train_df.text.values, train_df.label.values, dim=img_dim, transforms=train_aug)
 val_ds = HMDataset(val_df.img.values, val_df.text.values, val_df.label.values, dim=img_dim, transforms=val_aug)
 
@@ -25,7 +31,7 @@ valid_loader = DataLoader(val_ds, batch_size=batch_size, shuffle=True, num_worke
 model = Resne_t(model_name).to(device)
 criterion = nn.BCEWithLogitsLoss()
 
-def train_val(epoch, dataloader, optimizer, train=True, mode='train'):
+def train_val(epoch, dataloader, optimizer, rate = 1.00, train=True, mode='train'):
     t1 = time.time()
     running_loss = 0
     epoch_samples = 0
@@ -67,7 +73,8 @@ def train_val(epoch, dataloader, optimizer, train=True, mode='train'):
 
         elapsed = int(time.time() - t1)
         eta = int(elapsed / (idx+1) * (len(dataloader)-(idx+1)))
-        pred.extend(torch.softmax(outputs,1)[:,1].detach().cpu().numpy())
+        # Replace outputs_img with outputs
+        pred.extend(torch.softmax(outputs_img,1)[:,1].detach().cpu().numpy())
         lab.extend(torch.argmax(labels, 1).cpu().numpy())
         if train:
             msg = f"Epoch: {epoch} Progress: [{idx}/{len(dataloader)}] loss: {(running_loss/epoch_samples):.4f} Time: {elapsed}s ETA: {eta} s"
@@ -123,7 +130,7 @@ def main():
         # else:
         # rate = 0.65
 
-        train_val(epoch, train_loader, optimizer=optimizer, choice_weights=choice_weights, rate=rate, train=True, mode='train')
+        train_val(epoch, train_loader, optimizer=optimizer, rate=rate, train=True, mode='train')
         valid_loss, valid_auc = train_val(epoch, valid_loader, optimizer=optimizer, rate=1.00, train=False, mode='val')
         print("#"*20)
         print(f"Epoch {epoch} Report:")

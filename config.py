@@ -11,9 +11,12 @@ from albumentations import (
 )
 
 SEED = 69
+n_epochs = 5
+rate = 1.00
 device = 'cuda:0'
 data_dir = 'data/'
 model_name = 'resnet34'
+load_model = False
 img_dim = 512
 batch_size = 16
 learning_rate = 1e-3
