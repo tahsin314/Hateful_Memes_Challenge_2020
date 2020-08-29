@@ -1,8 +1,10 @@
 from config import *
+from utils import *
 import gc
 import time
 import numpy as np
 import pandas as pd
+from sklearn.metrics import roc_auc_score
 import torch
 from torch import nn
 from torch.utils.data import Dataset,DataLoader
@@ -20,7 +22,7 @@ val_df = pd.read_json(f'{data_dir}/dev.jsonl', lines=True)
 
 train_df['img'] = train_df['img'].map(lambda x: f"{data_dir}{x}")
 val_df['img'] = val_df['img'].map(lambda x: f"{data_dir}/{x}")
-print(train_df.head(5))
+history = pd.DataFrame()
 
 train_ds = HMDataset(train_df.img.values, train_df.text.values, train_df.label.values, dim=img_dim, transforms=train_aug)
 val_ds = HMDataset(val_df.img.values, val_df.text.values, val_df.label.values, dim=img_dim, transforms=val_aug)
@@ -74,7 +76,7 @@ def train_val(epoch, dataloader, optimizer, rate = 1.00, train=True, mode='train
         elapsed = int(time.time() - t1)
         eta = int(elapsed / (idx+1) * (len(dataloader)-(idx+1)))
         # Replace outputs_img with outputs
-        pred.extend(torch.softmax(outputs_img,1)[:,1].detach().cpu().numpy())
+        pred.extend(torch.softmax(outputs_img, 1)[:,1].detach().cpu().numpy())
         lab.extend(torch.argmax(labels, 1).cpu().numpy())
         if train:
             msg = f"Epoch: {epoch} Progress: [{idx}/{len(dataloader)}] loss: {(running_loss/epoch_samples):.4f} Time: {elapsed}s ETA: {eta} s"
