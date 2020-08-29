@@ -30,6 +30,9 @@ val_ds = HMDataset(val_df.img.values, val_df.text.values, val_df.label.values, d
 train_loader = DataLoader(train_ds,batch_size=batch_size, shuffle=True, drop_last=True, num_workers=4)
 valid_loader = DataLoader(val_ds, batch_size=batch_size, shuffle=True, num_workers=4)
 
+os.makedirs(model_dir, exist_ok=True)
+os.makedirs(history_dir, exist_ok=True)
+
 model = Resne_t(model_name).to(device)
 criterion = nn.BCEWithLogitsLoss()
 
@@ -93,7 +96,7 @@ def train_val(epoch, dataloader, optimizer, rate = 1.00, train=True, mode='train
         print(msg)
         history.loc[epoch, f'{mode}_loss'] = running_loss/epoch_samples
         history.loc[epoch, f'{mode}_auc'] = auc
-        history.to_csv(f'{history_dir}/history_{model_name}_{sz}.csv', index=False)
+        history.to_csv(f'{history_dir}/history_{model_name}_{img_dim}.csv', index=False)
         return running_loss/epoch_samples, auc
 
 
