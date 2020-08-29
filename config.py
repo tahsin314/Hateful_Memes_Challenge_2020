@@ -21,6 +21,7 @@ img_dim = 512
 batch_size = 16
 learning_rate = 1e-3
 mixed_precision = True
+patience = 3
 train_aug =Compose([
   ShiftScaleRotate(p=0.9,rotate_limit=180, border_mode= cv2.BORDER_REFLECT, value=[0, 0, 0], scale_limit=0.25),
     OneOf([
