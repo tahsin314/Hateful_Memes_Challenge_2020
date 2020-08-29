@@ -102,6 +102,7 @@ plist = [
         {'params': model.out.parameters(),  'lr': learning_rate},
     ]
 optimizer = optim.Adam(plist, lr=learning_rate)
+lr_reduce_scheduler = optim.lr_scheduler.ReduceLROnPlateau(optimizer, mode='min', factor=0.5, patience=patience, verbose=True, threshold=1e-4, threshold_mode='rel', cooldown=0, min_lr=1e-7, eps=1e-08)
 
 def main():
     prev_epoch_num = 0
