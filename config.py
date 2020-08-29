@@ -11,7 +11,7 @@ from albumentations import (
 )
 
 SEED = 69
-n_epochs = 5
+n_epochs = 10
 rate = 1.00
 device = 'cuda:0'
 data_dir = 'data/'
@@ -20,7 +20,7 @@ model_dir = 'model_dir'
 history_dir = 'history_dir'
 load_model = False
 img_dim = 512
-batch_size = 16
+batch_size = 32
 learning_rate = 1e-3
 mixed_precision = True
 patience = 3
