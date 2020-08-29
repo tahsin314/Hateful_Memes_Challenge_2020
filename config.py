@@ -1,3 +1,4 @@
+import cv2
 from albumentations.augmentations.transforms import Equalize, Posterize, Downscale
 from albumentations import (
     PadIfNeeded, HorizontalFlip, VerticalFlip, CenterCrop,    
