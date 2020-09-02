@@ -15,6 +15,7 @@ n_epochs = 10
 rate = 1.00
 device = 'cuda:0'
 data_dir = 'data/'
+model_name= 'Hybrid' # Will come up with a better name later
 img_model_name = 'resnet34'
 nlp_model_name = 'bert-base-cased'
 model_dir = 'model_dir'

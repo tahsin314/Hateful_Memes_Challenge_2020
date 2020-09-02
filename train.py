@@ -100,7 +100,7 @@ def train_val(epoch, dataloader, optimizer, rate = 1.00, train=True, mode='train
         print(msg)
         history.loc[epoch, f'{mode}_loss'] = running_loss/epoch_samples
         history.loc[epoch, f'{mode}_auc'] = auc
-        history.to_csv(f'{history_dir}/history_hybrid_{img_dim}.csv', index=False)
+        history.to_csv(f'{history_dir}/history_{model_name}_{img_dim}.csv', index=False)
         return running_loss/epoch_samples, auc
 
 
