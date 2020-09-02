@@ -27,9 +27,8 @@ val_df = pd.read_json(f'{data_dir}/dev.jsonl', lines=True)
 train_df['img'] = train_df['img'].map(lambda x: f"{data_dir}{x}")
 val_df['img'] = val_df['img'].map(lambda x: f"{data_dir}/{x}")
 history = pd.DataFrame()
-
-train_ds = HMDataset(train_df.img.values, train_df.text.values, tokenizer, train_df.label.values, dim=img_dim, transforms=train_aug)
-val_ds = HMDataset(val_df.img.values, val_df.text.values, val_df.label.values, dim=img_dim, transforms=val_aug)
+train_ds = HMDataset(train_df.img.values, train_df.text.values, tokenizer, max_len, train_df.label.values, dim=img_dim, transforms=train_aug)
+val_ds = HMDataset(val_df.img.values, val_df.text.values, tokenizer, max_len, val_df.label.values, dim=img_dim, transforms=val_aug)
 
 train_loader = DataLoader(train_ds,batch_size=batch_size, shuffle=True, drop_last=True, num_workers=4)
 valid_loader = DataLoader(val_ds, batch_size=batch_size, shuffle=True, num_workers=4)
@@ -53,7 +52,7 @@ def train_val(epoch, dataloader, optimizer, rate = 1.00, train=True, mode='train
     else:
         model.eval()
         print("Initiating val phase ...")
-    for idx, (_, img,text,labels) in enumerate(dataloader):
+    for idx, (_, img,text,encoding, labels) in enumerate(dataloader):
         with torch.set_grad_enabled(train):
             img = img.to(device)
             #  load encoded text here

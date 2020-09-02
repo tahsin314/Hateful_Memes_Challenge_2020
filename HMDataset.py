@@ -25,11 +25,12 @@ def onehot(size, target):
     return vec
 
 class HMDataset(Dataset):
-    def __init__(self, image_ids, texts, tokenizer, labels=None, dim=256, transforms=None):
+    def __init__(self, image_ids, texts, tokenizer, max_len=128, labels=None, dim=256, transforms=None):
         super().__init__()
         self.image_ids = image_ids
         self.texts = texts
         self.tokenizer = tokenizer
+        self.max_len = max_len
         self.labels = labels
         self.transforms = transforms
         self.dim = dim
@@ -40,7 +41,16 @@ class HMDataset(Dataset):
         image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
         image = cv2.resize(image, (self.dim, self.dim))
         text = self.texts[idx]
-        
+        encoding = self.tokenizer.encode_plus(
+        text,
+        add_special_tokens=True,
+        max_length=64,
+        return_token_type_ids=False,
+        pad_to_max_length=True,
+        return_attention_mask=True,
+        truncation=True,
+        return_tensors='np',
+        )
         if self.transforms is not None:
             aug = self.transforms(image=image)
             image = aug['image'].reshape(self.dim, self.dim, 3).transpose(2, 0, 1)
@@ -48,9 +58,9 @@ class HMDataset(Dataset):
             image = image.reshape(self.dim, self.dim, 3).transpose(2, 0, 1)
         if self.labels is not None:
             target = self.labels[idx]
-            return image_id, image, text, onehot(2, target)
+            return image_id, image, text, encoding, onehot(2, target)
         else:
-            return image_id, image, text
+            return image_id, image, text, encoding
 
     def __len__(self):
         return len(self.image_ids)

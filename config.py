@@ -21,6 +21,7 @@ model_dir = 'model_dir'
 history_dir = 'history_dir'
 load_model = False
 img_dim = 512
+max_len = 128
 batch_size = 32
 learning_rate = 1e-3
 mixed_precision = True
