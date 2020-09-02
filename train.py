@@ -57,8 +57,8 @@ def train_val(epoch, dataloader, optimizer, rate = 1.00, train=True, mode='train
     for idx, (_, img,text,encoding, labels) in enumerate(dataloader):
         with torch.set_grad_enabled(train):
             img = img.to(device)
-            input_ids = encoding['input_ids'].flatten().to(device)
-            attention_mask = encoding['attention_mask'].flatten().to(device)
+            input_ids = encoding['input_ids'].view(-1, max_len).to(device)
+            attention_mask = encoding['attention_mask'].view(-1, max_len).to(device)
             labels = labels.to(device)
             epoch_samples += len(img)
         optimizer.zero_grad()
@@ -88,7 +88,7 @@ def train_val(epoch, dataloader, optimizer, rate = 1.00, train=True, mode='train
         elapsed = int(time.time() - t1)
         eta = int(elapsed / (idx+1) * (len(dataloader)-(idx+1)))
         # Replace outputs_img with outputs
-        pred.extend(torch.softmax(outputs_img, 1)[:,1].detach().cpu().numpy())
+        pred.extend(torch.softmax(outputs, 1)[:,1].detach().cpu().numpy())
         lab.extend(torch.argmax(labels, 1).cpu().numpy())
         if train:
             msg = f"Epoch: {epoch} Progress: [{idx}/{len(dataloader)}] loss: {(running_loss/epoch_samples):.4f} Time: {elapsed}s ETA: {eta} s"

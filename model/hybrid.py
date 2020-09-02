@@ -1,5 +1,6 @@
 from model.img.resne_t import Resne_t
 from model.nlp.bert import BERT 
+import torch
 from torch import nn
 
 class Hybrid(nn.Module):

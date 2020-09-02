@@ -25,7 +25,7 @@ def onehot(size, target):
     return vec
 
 class HMDataset(Dataset):
-    def __init__(self, image_ids, texts, tokenizer, max_len=128, labels=None, dim=256, transforms=None):
+    def __init__(self, image_ids, texts, tokenizer, max_len=64, labels=None, dim=256, transforms=None):
         super().__init__()
         self.image_ids = image_ids
         self.texts = texts
@@ -44,11 +44,11 @@ class HMDataset(Dataset):
         encoding = self.tokenizer.encode_plus(
         text,
         add_special_tokens=True,
-        max_length=64,
+        max_length=self.max_len,
         return_token_type_ids=False,
         pad_to_max_length=True,
         return_attention_mask=True,
-        # truncation=True,
+        truncation=True,
         return_tensors='pt',
         )
         if self.transforms is not None:
