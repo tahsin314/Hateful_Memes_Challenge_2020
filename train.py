@@ -14,6 +14,7 @@ from torch import optim
 from transformers import BertTokenizer
 from HMDataset import HMDataset
 from model.img.resne_t import Resne_t
+from model.hybrid import Hybrid 
 
 if mixed_precision:
   scaler = torch.cuda.amp.GradScaler() 
@@ -36,7 +37,8 @@ valid_loader = DataLoader(val_ds, batch_size=batch_size, shuffle=True, num_worke
 os.makedirs(model_dir, exist_ok=True)
 os.makedirs(history_dir, exist_ok=True)
 
-model = Resne_t(img_model_name).to(device)
+# model = Resne_t(img_model_name).to(device)
+model = Hybrid(img_model_name, nlp_model_name).to(device)
 criterion = nn.BCEWithLogitsLoss()
 
 
@@ -55,16 +57,19 @@ def train_val(epoch, dataloader, optimizer, rate = 1.00, train=True, mode='train
     for idx, (_, img,text,encoding, labels) in enumerate(dataloader):
         with torch.set_grad_enabled(train):
             img = img.to(device)
-            #  load encoded text here
+            input_ids = encoding['input_ids'].flatten().to(device)
+            attention_mask = encoding['attention_mask'].flatten().to(device)
             labels = labels.to(device)
             epoch_samples += len(img)
         optimizer.zero_grad()
         with torch.cuda.amp.autocast(mixed_precision):
-            outputs_img = model(img.float())
-            loss_img = criterion(outputs_img, labels)
+            # outputs_img = model(img.float())
+            # loss_img = criterion(outputs_img, labels)
             # Calculate loss for encoded text here
-            loss_text = 0
-            loss = loss_img + loss_text
+            # loss_text = 0
+            outputs = model(img, input_ids, attention_mask)
+            # loss = loss_img + loss_text
+            loss = criterion(outputs, labels)
             running_loss += loss.item()
 
             if train:
@@ -105,7 +110,8 @@ def train_val(epoch, dataloader, optimizer, rate = 1.00, train=True, mode='train
 
 
 plist = [ 
-        {'params': model.backbone.parameters(),  'lr': learning_rate/100},
+        {'params': model.img_model.parameters(),  'lr': learning_rate/100},
+        {'params': model.nlp_model.parameters(),  'lr': learning_rate/1000},
         {'params': model.out.parameters(),  'lr': learning_rate},
     ]
 optimizer = optim.Adam(plist, lr=learning_rate)
