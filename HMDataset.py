@@ -1,3 +1,6 @@
+import logging
+logging.basicConfig(level=logging.ERROR)
+import transformers
 import time
 import numpy as np # linear algebra
 import pandas as pd # data processing, CSV file I/O (e.g. pd.read_csv)
@@ -22,10 +25,11 @@ def onehot(size, target):
     return vec
 
 class HMDataset(Dataset):
-    def __init__(self, image_ids, texts, labels=None, dim=256, transforms=None):
+    def __init__(self, image_ids, texts, tokenizer, labels=None, dim=256, transforms=None):
         super().__init__()
         self.image_ids = image_ids
         self.texts = texts
+        self.tokenizer = tokenizer
         self.labels = labels
         self.transforms = transforms
         self.dim = dim

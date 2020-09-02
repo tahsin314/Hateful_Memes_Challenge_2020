@@ -1,3 +1,5 @@
+import logging
+logging.basicConfig(level=logging.ERROR)
 from config import *
 from utils import *
 import gc
@@ -9,6 +11,7 @@ import torch
 from torch import nn
 from torch.utils.data import Dataset,DataLoader
 from torch import optim
+from transformers import BertTokenizer
 from HMDataset import HMDataset
 from model.img.resne_t import Resne_t
 
@@ -16,6 +19,7 @@ if mixed_precision:
   scaler = torch.cuda.amp.GradScaler() 
 
 np.random.seed(SEED)
+tokenizer = BertTokenizer.from_pretrained(nlp_model_name)
 
 train_df = pd.read_json(f'{data_dir}/train.jsonl', lines=True)
 val_df = pd.read_json(f'{data_dir}/dev.jsonl', lines=True)
@@ -24,7 +28,7 @@ train_df['img'] = train_df['img'].map(lambda x: f"{data_dir}{x}")
 val_df['img'] = val_df['img'].map(lambda x: f"{data_dir}/{x}")
 history = pd.DataFrame()
 
-train_ds = HMDataset(train_df.img.values, train_df.text.values, train_df.label.values, dim=img_dim, transforms=train_aug)
+train_ds = HMDataset(train_df.img.values, train_df.text.values, tokenizer, train_df.label.values, dim=img_dim, transforms=train_aug)
 val_ds = HMDataset(val_df.img.values, val_df.text.values, val_df.label.values, dim=img_dim, transforms=val_aug)
 
 train_loader = DataLoader(train_ds,batch_size=batch_size, shuffle=True, drop_last=True, num_workers=4)
@@ -33,8 +37,9 @@ valid_loader = DataLoader(val_ds, batch_size=batch_size, shuffle=True, num_worke
 os.makedirs(model_dir, exist_ok=True)
 os.makedirs(history_dir, exist_ok=True)
 
-model = Resne_t(model_name).to(device)
+model = Resne_t(img_model_name).to(device)
 criterion = nn.BCEWithLogitsLoss()
+
 
 def train_val(epoch, dataloader, optimizer, rate = 1.00, train=True, mode='train'):
     t1 = time.time()
