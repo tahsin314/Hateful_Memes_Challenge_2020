@@ -63,12 +63,7 @@ def train_val(epoch, dataloader, optimizer, rate = 1.00, train=True, mode='train
             epoch_samples += len(img)
         optimizer.zero_grad()
         with torch.cuda.amp.autocast(mixed_precision):
-            # outputs_img = model(img.float())
-            # loss_img = criterion(outputs_img, labels)
-            # Calculate loss for encoded text here
-            # loss_text = 0
             outputs = model(img, input_ids, attention_mask)
-            # loss = loss_img + loss_text
             loss = criterion(outputs, labels)
             running_loss += loss.item()
 
@@ -105,7 +100,7 @@ def train_val(epoch, dataloader, optimizer, rate = 1.00, train=True, mode='train
         print(msg)
         history.loc[epoch, f'{mode}_loss'] = running_loss/epoch_samples
         history.loc[epoch, f'{mode}_auc'] = auc
-        history.to_csv(f'{history_dir}/history_{model_name}_{img_dim}.csv', index=False)
+        history.to_csv(f'{history_dir}/history_hybrid_{img_dim}.csv', index=False)
         return running_loss/epoch_samples, auc
 
 
