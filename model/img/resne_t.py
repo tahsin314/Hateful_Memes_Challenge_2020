@@ -13,14 +13,13 @@ from pprint import pprint
 
 class Resne_t(nn.Module):
 
-    def __init__(self, model_name='resnet34'):
+    def __init__(self, model_name='resnet34', num_neuron=256):
         super().__init__()
         self.backbone = timm.create_model(model_name, pretrained=True)
         self.in_features = 512
-        self.backbone.fc = nn.Linear(self.in_features, 128)
-        self.out = nn.Linear(128, 2)
-
-    def forward(self, x, meta_data=None):
+        self.backbone.fc = nn.Linear(self.in_features, num_neuron)
+        
+    def forward(self, x):
         x = self.backbone.conv1(x)
         x = self.backbone.bn1(x)
         x = self.backbone.act1(x)
@@ -32,5 +31,4 @@ class Resne_t(nn.Module):
         x = self.backbone.layer4(x)
         x = self.backbone.global_pool(x)
         x = self.backbone.fc(x)
-        x = self.out(x)
         return x
